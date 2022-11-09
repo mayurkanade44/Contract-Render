@@ -235,7 +235,7 @@ export const DataProvider = ({ children }) => {
     dispatch({ type: LOADING });
     try {
       const res = await axios.post(
-        "https://contract.render.com/api/login",
+        "https://contract-test.onrender.com/api/login",
         currentUser
       );
       const { name, token, role } = res.data;
