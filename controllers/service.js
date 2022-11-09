@@ -508,6 +508,7 @@ const generateQr = async (isValidContract, services) => {
   try {
     const serviceId = await services._id;
     const contractNo = await isValidContract.contractNo;
+    console.log(contractNo, typeof contractNo);
     const contractName = contractNo.replaceAll("/", "");
     const name = `${contractName} ${services.frequency} ${services.service.length}`;
 
