@@ -507,7 +507,7 @@ const sendEmail = async (
 const generateQr = async (isValidContract, services) => {
   try {
     const serviceId = await services._id;
-    const contractNo = isValidContract.contractNo;
+    const contractNo = await isValidContract.contractNo;
     const contractName = contractNo.replaceAll("/", "");
     const name = `${contractName} ${services.frequency} ${services.service.length}`;
 
