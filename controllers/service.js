@@ -533,6 +533,38 @@ const generateQr = async (isValidContract, services) => {
   }
 };
 
+const reGenerateQr = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const services = await Service.findOne({ _id: id }).populate({
+      path: "contract",
+      select: "contractNo",
+    });
+    const contractName = services.contract.contractNo.replace("/", "");
+    const name = `${contractName} ${services.frequency} ${services.service.length}`;
+    const stringdata = `https://contractqr.onrender.com/feedback/${id}`;
+    await QRCode.toFile(`./files/${name}.png`, stringdata, { width: 20 });
+    const result = await cloudinary.uploader.upload(`files/${name}.png`, {
+      width: 80,
+      height: 80,
+      use_filename: true,
+      folder: "service-cards",
+    });
+    const serv = await Service.findByIdAndUpdate(
+      { _id: id },
+      { qr: result.secure_url },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+    fs.unlinkSync(`./files/${name}.png`);
+    res.status(200).json({ msg: "QR Regenerated" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const createService = async (req, res) => {
   const { contract: contractId } = req.body;
   const isValidContract = await Contract.findOne({ _id: contractId });
@@ -988,4 +1020,5 @@ module.exports = {
   getAllStats,
   dailyReport,
   serviceNotDoneReport,
+  reGenerateQr
 };

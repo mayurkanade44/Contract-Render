@@ -37,6 +37,7 @@ import {
   RENEWAL_FILE,
   JOB_NOT_FILE,
   DOCUMENTS_DELETE,
+  REGENERATE_QR,
 } from "./action";
 
 import { initialState } from "./data_context";
@@ -307,6 +308,15 @@ const data_reducer = (state, action) => {
         alertType: "success",
         showAlert: true,
         ratrid: "No",
+      };
+    }
+    case REGENERATE_QR: {
+      return {
+        ...state,
+        loading: false,
+        alertText: action.payload.msg,
+        alertType: "success",
+        showAlert: true,
       };
     }
     case CARD_FAIL: {

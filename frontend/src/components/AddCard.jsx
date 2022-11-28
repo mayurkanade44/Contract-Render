@@ -35,6 +35,7 @@ const AddCard = () => {
     deleteService,
     del,
     ratrid,
+    reGenerateQr,
   } = useDataContext();
 
   const { contractNo, startDate, endDate, services, type, sendMail } =
@@ -242,6 +243,14 @@ const AddCard = () => {
                       >
                         Delete
                       </button>
+                      {role === "Admin" && (
+                        <button
+                          className="btn btn-primary ms-2"
+                          onClick={() => reGenerateQr(_id)}
+                        >
+                          Regenerate QR
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

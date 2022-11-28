@@ -41,6 +41,7 @@ import {
   RENEWAL_FILE,
   JOB_NOT_FILE,
   DOCUMENTS_DELETE,
+  REGENERATE_QR,
 } from "./action";
 
 const DataContext = createContext();
@@ -737,6 +738,18 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  const reGenerateQr = async (id) => {
+    try {
+      const res = await authFetch.get(`/service/qr/${id}`);
+      console.log(res);
+      dispatch({ type: REGENERATE_QR, payload: res.data });
+    } catch (error) {
+      console.log(error);
+    }
+    clearAlert();
+  };
+
+
   return (
     <DataContext.Provider
       value={{
@@ -776,6 +789,7 @@ export const DataProvider = ({ children }) => {
         documentUpload,
         allJobData,
         deleteDocFile,
+        reGenerateQr
       }}
     >
       {children}

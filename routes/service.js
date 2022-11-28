@@ -17,6 +17,7 @@ const {
   dailyReport,
   getAllStats,
   serviceNotDoneReport,
+  reGenerateQr,
 } = require("../controllers/service");
 
 router
@@ -35,6 +36,7 @@ router.route("/sendmail/:id").get(authorizeUser("Admin"), sendContractEmail);
 router
   .route("/create/:id")
   .get(authorizeUser("Sales", "Admin", "Back Office"), createDoc);
+router.route("/qr/:id").get(authorizeUser("Admin"), reGenerateQr);
 router
   .route("/:id")
   .get(authorizeUser("Operator", "Admin"), singleService)
