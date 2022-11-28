@@ -115,7 +115,7 @@ const createDoc = async (req, res) => {
     services.forEach(async (element, index) => {
       const z = element._id.toString().replace(/ObjectId\("(.*)"\)/, "$1");
       const tp = await QRCode.toDataURL(
-        `http://localhost:5000/api/service/${z}`
+        `https://contractqr.onrender.com/feedback/${z}`
       );
       let template = fs.readFileSync(path.resolve(__dirname, "test3.docx"));
       const template1 = fs.readFileSync(path.resolve(__dirname, "test2.docx"));
@@ -169,7 +169,7 @@ const createDoc = async (req, res) => {
         },
       });
 
-      const contractName = contractNo.replaceAll("/", "-");
+      const contractName = contractNo.replace(/\//g, "-");
       const filename = `${contractName} ${element.frequency} ${
         index + 1
       } ${company}`;
@@ -426,7 +426,7 @@ const createContrtact = async (id, req, res) => {
       },
     });
 
-    const contractName = contractNo.replaceAll("/", "");
+    const contractName = contractNo.replace(/\//g, "");
     const filename = "test";
     fs.writeFileSync(path.resolve(__dirname, `${filename}.docx`), buffer);
   } catch (error) {
@@ -470,7 +470,7 @@ const sendEmail = async (
       completion: completion,
       comments: comments,
       serviceDate: moment(serviceDate).format("DD/MM/YYYY"),
-      link: `http://localhost:3000/feedback/${serviceId}`,
+      link: `https://contractqr.onrender.com/feedback/${serviceId}`,
     },
     template_id: "d-25ffbbb44072488093fa6dcb9bd3978a",
     attachments: att,
@@ -508,11 +508,10 @@ const generateQr = async (isValidContract, services) => {
   try {
     const serviceId = await services._id;
     const contractNo = await isValidContract.contractNo;
-    console.log(contractNo, typeof contractNo);
     const contractName = contractNo.replace(/\//g, "");
     const name = `${contractName} ${services.frequency} ${services.service.length}`;
 
-    const stringdata = `http://localhost:5000/api/service/${serviceId}`;
+    const stringdata = `https://contractqr.onrender.com/feedback/${serviceId}`;
     await QRCode.toFile(`./files/${name}.png`, stringdata, { width: 20 });
     const result = await cloudinary.uploader.upload(`files/${name}.png`, {
       width: 80,
@@ -640,7 +639,7 @@ const generateReport = async (req, res) => {
   const { id } = req.params;
   try {
     const data = await ServiceReport.find({ service: id });
-    const contractNo = data[0].contract.replaceAll("/", "");
+    const contractNo = data[0].contract.replace(/\//g, "");
     const filename = `Service Report Of ${contractNo}.csv`;
 
     const fields1 = [];
