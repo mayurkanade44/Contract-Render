@@ -169,7 +169,7 @@ const createDoc = async (req, res) => {
         },
       });
 
-      const contractName = contractNo.replaceAll("/", "-");
+      const contractName = contractNo.replace(/\//g, "-");
       const filename = `${contractName} ${element.frequency} ${
         index + 1
       } ${company}`;
@@ -426,7 +426,7 @@ const createContrtact = async (id, req, res) => {
       },
     });
 
-    const contractName = contractNo.replaceAll("/", "");
+    const contractName = contractNo.replace(/\//g, "");
     const filename = "test";
     fs.writeFileSync(path.resolve(__dirname, `${filename}.docx`), buffer);
   } catch (error) {
@@ -490,7 +490,7 @@ const generateQr = async (isValidContract, services) => {
   try {
     const serviceId = await services._id;
     const contractNo = await isValidContract.contractNo;
-    const contractName = contractNo.replaceAll("/", "");
+    const contractName = contractNo.replace(/\//g, "");
     const name = `${contractName} ${services.frequency} ${services.service.length}`;
 
     const stringdata = `https://cqr.sat9.in/feedback/${serviceId}`;
@@ -623,7 +623,7 @@ const generateReport = async (req, res) => {
   const { id } = req.params;
   try {
     const data = await ServiceReport.find({ service: id });
-    const contractNo = data[0].contract.replaceAll("/", "");
+    const contractNo = data[0].contract.replace(/\//g, "-");
     const filename = `Service Report Of ${contractNo}.csv`;
 
     const fields1 = [];
