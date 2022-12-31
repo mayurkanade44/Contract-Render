@@ -37,7 +37,8 @@ import {
   RENEWAL_FILE,
   JOB_NOT_FILE,
   DOCUMENTS_DELETE,
-  REGENERATE_QR,
+  UPDATE_CARD_FAIL,
+  EDIT_SERVICE,
 } from "./action";
 
 import { initialState } from "./data_context";
@@ -299,6 +300,19 @@ const data_reducer = (state, action) => {
         del: true,
       };
     }
+
+    case EDIT_SERVICE: {
+      return {
+        ...state,
+        loading: false,
+        treatmentLocation: action.payload.treatmentLocation,
+        frequency: action.payload.frequency,
+        business: action.payload.business,
+        edit: true,
+        area: action.payload.area.split(" ")[0],
+        cardId: action.payload._id,
+      };
+    }
     case CREATE_CARD: {
       return {
         ...state,
@@ -308,15 +322,8 @@ const data_reducer = (state, action) => {
         alertType: "success",
         showAlert: true,
         ratrid: "No",
-      };
-    }
-    case REGENERATE_QR: {
-      return {
-        ...state,
-        loading: false,
-        alertText: action.payload.msg,
-        alertType: "success",
-        showAlert: true,
+        edit: false,
+        cardId: "",
       };
     }
     case CARD_FAIL: {
@@ -526,6 +533,16 @@ const data_reducer = (state, action) => {
         loading: false,
         alertText: "Email Has Been Sent",
         alertType: "success",
+        showAlert: true,
+      };
+    }
+    case UPDATE_CARD_FAIL: {
+      return {
+        ...state,
+        loading: false,
+        alertText:
+          "Daily Email Limit Exceeded, Try Again Today/Tomorrow after 3 PM",
+        alertType: "danger",
         showAlert: true,
       };
     }

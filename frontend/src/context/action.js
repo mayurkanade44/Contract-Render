@@ -39,4 +39,5 @@ export const DOCUMENTS_DELETE = "DOCUMENTS_DELETE";
 export const RENEWAL_FILE = "RENEWAL_FILE";
 export const JOB_NOT_FILE = "JOB_NOT_FILE";
 export const UPDATE_CARD_FAIL = "UPDATE_CARD_FAIL";
-export const REGENERATE_QR = "REGENERATE_QR";
+export const EDIT_SERVICE = "EDIT_SERVICE";
+

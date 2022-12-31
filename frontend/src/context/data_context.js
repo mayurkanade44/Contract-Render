@@ -41,7 +41,8 @@ import {
   RENEWAL_FILE,
   JOB_NOT_FILE,
   DOCUMENTS_DELETE,
-  REGENERATE_QR,
+  UPDATE_CARD_FAIL,
+  EDIT_SERVICE,
 } from "./action";
 
 const DataContext = createContext();
@@ -163,13 +164,15 @@ export const initialState = {
   jobStats: [],
   serviceStats: [],
   renewalFile: "",
+  edit: false,
+  cardId: "",
 };
 
 export const DataProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const authFetch = axios.create({
-    baseURL: "/api",
+    baseURL: "http://cqr.onrender.com/api",
   });
 
   authFetch.interceptors.request.use(
@@ -201,7 +204,7 @@ export const DataProvider = ({ children }) => {
   const clearAlert = () => {
     setTimeout(() => {
       dispatch({ type: CLEAR_ALERT });
-    }, 2000);
+    }, 3000);
   };
 
   const addLocalStorage = ({ name, token, role }) => {
@@ -236,7 +239,7 @@ export const DataProvider = ({ children }) => {
     dispatch({ type: LOADING });
     try {
       const res = await axios.post(
-        "https://contractqr.onrender.com/api/login",
+        "http://cqr.onrender.com/api/login",
         currentUser
       );
       const { name, token, role } = res.data;
@@ -441,6 +444,22 @@ export const DataProvider = ({ children }) => {
     clearAlert();
   };
 
+  const editService = async ({
+    frequency,
+    business,
+    treatmentLocation,
+    _id,
+    area,
+  }) => {
+    console.log(area);
+    try {
+      dispatch({
+        type: EDIT_SERVICE,
+        payload: { frequency, business, treatmentLocation, _id, area },
+      });
+    } catch (error) {}
+  };
+
   const sameDetails = () => {
     dispatch({ type: SAME_DETAILS });
   };
@@ -561,14 +580,37 @@ export const DataProvider = ({ children }) => {
       "Bungalow",
     ];
     try {
-      const { frequency, contract, treatmentLocation, area, business, ratrid } =
-        state;
+      const {
+        frequency,
+        contract,
+        treatmentLocation,
+        area,
+        business,
+        ratrid,
+        edit,
+        cardId,
+      } = state;
       value.split(",").map((ser) => {
         return serv.push(ser.trim());
       });
       if (ratrid === "No" && serv.includes("Rat Rid") && serv.length > 5) {
         return dispatch({ type: CARD_FAIL });
       }
+      if (edit) {
+        await authFetch.patch(`/service/create/${cardId}`, {
+          serviceDue: dueMonths,
+          business,
+          frequency,
+          service: serv,
+          treatmentLocation,
+          contract,
+          chemicals: chemicals,
+          area: home.includes(business) ? business : `${area} Sq.Ft`,
+        });
+        dispatch({ type: CREATE_CARD });
+        return;
+      }
+
       await authFetch.post("/service", {
         serviceDue: dueMonths,
         business,
@@ -633,6 +675,7 @@ export const DataProvider = ({ children }) => {
       dispatch({ type: UPDATE_CARD });
       dispatch({ type: CLEAR_VALUES });
     } catch (error) {
+      dispatch({ type: UPDATE_CARD_FAIL });
       console.log(error);
     }
   };
@@ -705,6 +748,7 @@ export const DataProvider = ({ children }) => {
         form,
         config
       );
+      fetchSingleContract(id);
       dispatch({ type: DOCUMENTS_UPLOAD, payload: res.data });
     } catch (error) {
       console.log(error);
@@ -737,18 +781,6 @@ export const DataProvider = ({ children }) => {
       console.log(error);
     }
   };
-
-  const reGenerateQr = async (id) => {
-    try {
-      const res = await authFetch.get(`/service/qr/${id}`);
-      console.log(res);
-      dispatch({ type: REGENERATE_QR, payload: res.data });
-    } catch (error) {
-      console.log(error);
-    }
-    clearAlert();
-  };
-
 
   return (
     <DataContext.Provider
@@ -789,7 +821,7 @@ export const DataProvider = ({ children }) => {
         documentUpload,
         allJobData,
         deleteDocFile,
-        reGenerateQr
+        editService,
       }}
     >
       {children}

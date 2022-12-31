@@ -113,9 +113,9 @@ const createDoc = async (req, res) => {
 
   try {
     services.forEach(async (element, index) => {
-      const z = element._id.toString().replace(/ObjectId\("(.*)"\)/, "$1");
+      const z = element._id.toString();
       const tp = await QRCode.toDataURL(
-        `https://contractqr.onrender.com/feedback/${z}`
+        `http://cqr.sat9.in/feedback/${z}`
       );
       let template = fs.readFileSync(path.resolve(__dirname, "test3.docx"));
       const template1 = fs.readFileSync(path.resolve(__dirname, "test2.docx"));
@@ -169,7 +169,7 @@ const createDoc = async (req, res) => {
         },
       });
 
-      const contractName = contractNo.replace(/\//g, "-");
+      const contractName = contractNo.replaceAll("/", "-");
       const filename = `${contractName} ${element.frequency} ${
         index + 1
       } ${company}`;
@@ -426,7 +426,7 @@ const createContrtact = async (id, req, res) => {
       },
     });
 
-    const contractName = contractNo.replace(/\//g, "");
+    const contractName = contractNo.replaceAll("/", "");
     const filename = "test";
     fs.writeFileSync(path.resolve(__dirname, `${filename}.docx`), buffer);
   } catch (error) {
@@ -446,72 +446,54 @@ const sendEmail = async (
   treatmentLocation,
   serviceId
 ) => {
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-  const att = [];
-  for (let file of image) {
-    const response = await axios.get(file, { responseType: "arraybuffer" });
-    const base64File = Buffer.from(response.data, "binary").toString("base64");
-    const attachObj = {
-      content: base64File,
-      filename: "attachment.jpg",
-      type: "application/jpg",
-      disposition: "attachment",
+  try {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+    const att = [];
+    for (let file of image) {
+      const response = await axios.get(file, { responseType: "arraybuffer" });
+      const base64File = Buffer.from(response.data, "binary").toString(
+        "base64"
+      );
+      const attachObj = {
+        content: base64File,
+        filename: "attachment.jpg",
+        type: "application/jpg",
+        disposition: "attachment",
+      };
+      att.push(attachObj);
+    }
+    const msg = {
+      to: emails,
+      from: { email: "noreply.epcorn@gmail.com", name: "EPCORN" },
+      dynamic_template_data: {
+        contractNo: contractNo,
+        shipAddress: shipAddress,
+        treatmentLocation: treatmentLocation,
+        service: serv,
+        completion: completion,
+        comments: comments,
+        serviceDate: moment(serviceDate).format("DD/MM/YYYY"),
+        link: `http://cqr.sat9.in/feedback/${serviceId}`,
+      },
+      template_id: "d-25ffbbb44072488093fa6dcb9bd3978a",
+      attachments: att,
     };
-    att.push(attachObj);
+    await sgMail.send(msg);
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
   }
-  const msg = {
-    to: emails,
-    from: { email: "noreply.epcorn@gmail.com", name: "EPCORN" },
-    dynamic_template_data: {
-      contractNo: contractNo,
-      shipAddress: shipAddress,
-      treatmentLocation: treatmentLocation,
-      service: serv,
-      completion: completion,
-      comments: comments,
-      serviceDate: moment(serviceDate).format("DD/MM/YYYY"),
-      link: `https://contractqr.onrender.com/feedback/${serviceId}`,
-    },
-    template_id: "d-25ffbbb44072488093fa6dcb9bd3978a",
-    attachments: att,
-  };
-  await sgMail.send(msg);
-
-  // request.get(image, { encoding: null }, (err, res) => {
-  //   const base64File = Buffer.from(res.body).toString("base64");
-  //   const msg = {
-  //     to: emails,
-  //     cc: "exteam.epcorn@gmail.com",
-  //     from: { email: "noreply.epcorn@gmail.com", name: "EPCORN" },
-  //     dynamic_template_data: {
-  //       contractNo: contractNo,
-  //       service: serv,
-  //       completion: completion,
-  //       comments: comments,
-  //       serviceDate: moment(serviceDate).format("DD/MM/YYYY"),
-  //     },
-  //     template_id: "d-25ffbbb44072488093fa6dcb9bd3978a",
-  //     attachments: [
-  //       {
-  //         content: base64File,
-  //         filename: "attachment.jpg",
-  //         type: "application/jpg",
-  //         disposition: "attachment",
-  //       },
-  //     ],
-  //   };
-  //   sgMail.send(msg);
-  // });
 };
 
 const generateQr = async (isValidContract, services) => {
   try {
     const serviceId = await services._id;
     const contractNo = await isValidContract.contractNo;
-    const contractName = contractNo.replace(/\//g, "");
+    const contractName = contractNo.replaceAll("/", "");
     const name = `${contractName} ${services.frequency} ${services.service.length}`;
 
-    const stringdata = `https://contractqr.onrender.com/feedback/${serviceId}`;
+    const stringdata = `http://cqr.sat9.in/feedback/${serviceId}`;
     await QRCode.toFile(`./files/${name}.png`, stringdata, { width: 20 });
     const result = await cloudinary.uploader.upload(`files/${name}.png`, {
       width: 80,
@@ -528,38 +510,6 @@ const generateQr = async (isValidContract, services) => {
       }
     );
     fs.unlinkSync(`./files/${name}.png`);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const reGenerateQr = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const services = await Service.findOne({ _id: id }).populate({
-      path: "contract",
-      select: "contractNo",
-    });
-    const contractName = services.contract.contractNo.replace("/", "");
-    const name = `${contractName} ${services.frequency} ${services.service.length}`;
-    const stringdata = `https://contractqr.onrender.com/feedback/${id}`;
-    await QRCode.toFile(`./files/${name}.png`, stringdata, { width: 20 });
-    const result = await cloudinary.uploader.upload(`files/${name}.png`, {
-      width: 80,
-      height: 80,
-      use_filename: true,
-      folder: "service-cards",
-    });
-    const serv = await Service.findByIdAndUpdate(
-      { _id: id },
-      { qr: result.secure_url },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-    fs.unlinkSync(`./files/${name}.png`);
-    res.status(200).json({ msg: "QR Regenerated" });
   } catch (error) {
     console.log(error);
   }
@@ -645,7 +595,7 @@ const updateCard = async (req, res) => {
       const shipAddress = `${addre.address1}, ${addre.address2}, ${addre.address3}, ${addre.address4}, ${addre.city}`;
       const emailSub = service.contract.contractNo;
       const serv = service.service.toString();
-      sendEmail(
+      const suc = await sendEmail(
         emails,
         image,
         emailSub,
@@ -657,12 +607,14 @@ const updateCard = async (req, res) => {
         treatmentLocation,
         serviceId
       );
-    }
 
+      if (!suc) return res.status(400).json({ msg: "There is some error" });
+    }
     req.body.service = serviceId;
     await ServiceReport.create(req.body);
     res.status(200).json({ service });
   } catch (error) {
+    res.status(400).json({ msg: "There is some error" });
     console.log(error);
   }
 };
@@ -671,7 +623,7 @@ const generateReport = async (req, res) => {
   const { id } = req.params;
   try {
     const data = await ServiceReport.find({ service: id });
-    const contractNo = data[0].contract.replace(/\//g, "");
+    const contractNo = data[0].contract.replaceAll("/", "");
     const filename = `Service Report Of ${contractNo}.csv`;
 
     const fields1 = [];
@@ -740,6 +692,20 @@ const deleteService = async (req, res) => {
     const { id } = req.params;
     await Service.findByIdAndDelete({ _id: id });
     res.status(200).json({ msg: "Service card has been deleted" });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const editService = async (req, res) => {
+  const { id } = req.params;
+  try {
+    await Service.findByIdAndUpdate({ _id: id }, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    res.status(200).json({ msg: "Card has been updated" });
   } catch (error) {
     console.log(error);
   }
@@ -1020,5 +986,5 @@ module.exports = {
   getAllStats,
   dailyReport,
   serviceNotDoneReport,
-  reGenerateQr
+  editService,
 };
