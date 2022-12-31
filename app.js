@@ -29,6 +29,7 @@ const whitelist = [
   "https://contractqr.herokuapp.com",
   "https://cqr.sat9.in",
   "https://cbdp.sat9.in",
+  "http://cqr.onrender.com",
 ];
 const corsOptions = {
   origin: function (origin, callback) {
