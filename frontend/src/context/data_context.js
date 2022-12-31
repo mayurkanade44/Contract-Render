@@ -172,7 +172,7 @@ export const DataProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   const authFetch = axios.create({
-    baseURL: "http://cqr.onrender.com/api",
+    baseURL: "https://cqr.onrender.com/api",
   });
 
   authFetch.interceptors.request.use(
@@ -239,7 +239,7 @@ export const DataProvider = ({ children }) => {
     dispatch({ type: LOADING });
     try {
       const res = await axios.post(
-        "http://cqr.onrender.com/api/login",
+        "https://cqr.onrender.com/api/login",
         currentUser
       );
       const { name, token, role } = res.data;

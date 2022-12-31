@@ -115,7 +115,7 @@ const createDoc = async (req, res) => {
     services.forEach(async (element, index) => {
       const z = element._id.toString();
       const tp = await QRCode.toDataURL(
-        `http://cqr.sat9.in/feedback/${z}`
+        `https://cqr.sat9.in/feedback/${z}`
       );
       let template = fs.readFileSync(path.resolve(__dirname, "test3.docx"));
       const template1 = fs.readFileSync(path.resolve(__dirname, "test2.docx"));
@@ -473,7 +473,7 @@ const sendEmail = async (
         completion: completion,
         comments: comments,
         serviceDate: moment(serviceDate).format("DD/MM/YYYY"),
-        link: `http://cqr.sat9.in/feedback/${serviceId}`,
+        link: `https://cqr.sat9.in/feedback/${serviceId}`,
       },
       template_id: "d-25ffbbb44072488093fa6dcb9bd3978a",
       attachments: att,
@@ -493,7 +493,7 @@ const generateQr = async (isValidContract, services) => {
     const contractName = contractNo.replaceAll("/", "");
     const name = `${contractName} ${services.frequency} ${services.service.length}`;
 
-    const stringdata = `http://cqr.sat9.in/feedback/${serviceId}`;
+    const stringdata = `https://cqr.sat9.in/feedback/${serviceId}`;
     await QRCode.toFile(`./files/${name}.png`, stringdata, { width: 20 });
     const result = await cloudinary.uploader.upload(`files/${name}.png`, {
       width: 80,
