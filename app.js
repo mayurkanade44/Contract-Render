@@ -24,23 +24,23 @@ const { authenticateUser } = require("./middleware/auth");
 
 const path = require("path");
 
-const whitelist = [
-  "http://localhost:3000",
-  "https://contractqr.herokuapp.com",
-  "https://cqr.sat9.in",
-  "https://cbdp.sat9.in",
-  "https://cqr.onrender.com",
-];
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (whitelist.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  maxAge: 600,
-};
+// const whitelist = [
+//   "http://localhost:3000",
+//   "https://contractqr.herokuapp.com",
+//   "https://cqr.sat9.in",
+//   "https://cbdp.sat9.in",
+//   "https://www.cqr.onrender.com",
+// ];
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     if (whitelist.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   maxAge: 600,
+// };
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -55,7 +55,7 @@ if (process.env.NODE_ENV !== "production") {
 app.use(express.static(path.join(__dirname, "/frontend/build")));
 
 app.use(express.static("./public"));
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json());
 app.use(uploadImage({ useTempFiles: true }));
 
